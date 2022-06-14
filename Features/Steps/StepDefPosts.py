@@ -98,14 +98,14 @@ def step_impl(context):
     context.typicode_get_request = requests.get(context.url, headers=context.headers)
 
 
-@then(u'comments should only display posts id 1')
-def step_impl(context):
+@then(u'comments should only display posts id {postId:d}')
+def step_impl(context, postId):
     assert context.typicode_get_request.status_code == 200
     assert len(context.typicode_get_request.json()) > 0
     for each in context.typicode_get_request.json():
         assert "postId" in each
         assert isinstance(each["postId"], int)
-        assert each["postId"] == 1
+        assert each["postId"] == postId
         assert "id" in each
         assert isinstance(each["id"], int)
         assert each["id"] > 0
@@ -137,3 +137,36 @@ def step_impl(context, title, body):
     assert "id" in context.typicode_get_request.json()
     assert isinstance(context.typicode_get_request.json()["id"], int)
     assert context.typicode_get_request.json()["id"] != ""
+
+@given(u'the typicode comment path params')
+def step_impl(context):
+    context.url = getConfig()['API']['endpoint'] + GET_COMMENTS
+    context.headers = {"Content-Type": "application/json"}
+
+
+@when(u'typicode comment endpoint is executed')
+def step_impl(context):
+    context.typicode_get_request = requests.get(context.url, headers=context.headers)
+
+
+@then(u'comments endpoint should be displayed correctly')
+def step_impl(context):
+    assert context.typicode_get_request.status_code == 200
+    assert isinstance(context.typicode_get_request.json(), list)
+    assert len(context.typicode_get_request.json()) > 0
+    for each in context.typicode_get_request.json():
+        assert "postId" in each
+        assert isinstance(each["postId"], int)
+        assert each["postId"] > 0
+        assert "id" in each
+        assert isinstance(each["id"], int)
+        assert each["id"] > 0
+        assert "name" in each
+        assert isinstance(each["name"], str)
+        assert each["name"] != ""
+        assert "email" in each
+        assert isinstance(each["email"], str)
+        assert each["email"] != ""
+        assert "body" in each
+        assert isinstance(each["body"], str)
+        assert each["body"] != ""
